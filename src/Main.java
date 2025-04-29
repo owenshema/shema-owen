@@ -1,53 +1,80 @@
-package Nursery_Management_System;
+import java.util.*;
 
-import java.util.Scanner;
-
-// Main Application
 public class Main {
-
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+        List<Personnel> personnelList = new ArrayList<>();
+        List<Resource> resources = new ArrayList<>();
 
-        // Creating the teachers
-        System.out.println("Enter teacher's ID: ");
-        String id = scanner.nextLine();
-        System.out.println("Enter teacher's name: ");
-        String name = scanner.nextLine();
-        System.out.println("Enter teacher Role");
-        String role  = scanner.nextLine();
-        Teacher teacher1 = new Teacher(id,name,role);
+        // Input mission details
+        System.out.print("Enter Mission ID: ");
+        String missionId = scanner.nextLine();
 
+        System.out.print("Enter Mission Name: ");
+        String missionName = scanner.nextLine();
 
-        // Create teacher instances
-         Teacher teacher2 = new Teacher("T002", "Mr. Bob", "Teacher");
+        // For simplicity, fixed dates (can be extended to parse input)
+        Date startDate = new Date(2025 - 1900, Calendar.APRIL, 20);
+        Date endDate = new Date(2025 - 1900, Calendar.APRIL, 25);
 
-        // Create nursery class instances
-        NurseryClass babyClass = new BabyClass("C001", "Baby Class");
-        NurseryClass middleClass = new MiddleClass("C002", "Middle Class");
-        NurseryClass topClass = new TopClass("C003", "Top Class");
+        // Create mission
+        ReconMission recon = new ReconMission(missionId, missionName, startDate, endDate, "PLANNED");
 
-        // Assign teachers to classes
-        teacher1.assignToClass(babyClass);
-        teacher2.assignToClass(topClass);
+        // Input number of personnel
+        System.out.print("How many personnel to add? ");
+        int numPersonnel = scanner.nextInt();
+        scanner.nextLine(); // consume leftover newline
 
-        // Create student instances
-        Student student1 = new Student("S001", "John", 3, "Mr. and Mrs. Smith");
-        Student student2 = new Student("S002", "Emma", 4, "Mr. and Mrs. Johnson");
+        for (int i = 0; i < numPersonnel; i++) {
+            System.out.println("Enter details for personnel " + (i + 1));
+            System.out.print("ID: ");
+            String id = scanner.nextLine();
+            System.out.print("Name: ");
+            String name = scanner.nextLine();
+            System.out.print("Role: ");
+            String role = scanner.nextLine();
 
-        // Enroll students
-        babyClass.enrollStudent(student1);
-        topClass.enrollStudent(student2);
+            Personnel p = new Personnel(id, name, role);
+            recon.addPersonnel(p);
+        }
 
-        // Conduct activities
-        babyClass.conductActivity("Singing");
-        topClass.conductActivity("Reading");
+        // Validate personnel count
+        if (recon.assignedPersonnel.size() < 2) {
+            System.out.println("Error: ReconMission requires at least 2 personnel.");
+            return;
+        }
 
-        // Track progress
-        babyClass.trackProgress();
-        topClass.trackProgress();
+        // Input resources
+        System.out.print("How many resources to add? ");
+        int numResources = scanner.nextInt();
+        scanner.nextLine(); // consume newline
 
-        // Generate reports
-        babyClass.generateClassReport();
-        topClass.generateClassReport();
+        for (int i = 0; i < numResources; i++) {
+            System.out.println("Enter details for resource " + (i + 1));
+            System.out.print("ID: ");
+            String rid = scanner.nextLine();
+            System.out.print("Name: ");
+            String rname = scanner.nextLine();
+            System.out.print("Quantity: ");
+            int qty = scanner.nextInt();
+            scanner.nextLine(); // consume newline
+            System.out.print("Type: ");
+            String type = scanner.nextLine();
+
+            resources.add(new Resource(rid, rname, qty, type));
+        }
+
+        // Validate drone availability
+        boolean hasDrone = resources.stream().anyMatch(r -> r.getName().equalsIgnoreCase("Drone") && r.isAvailable(1));
+        if (!hasDrone) {
+            System.out.println("Error: Drone resource is required for ReconMission.");
+            return;
+        }
+
+        // Execute mission
+        recon.assignTask();
+        recon.allocateResources(resources);
+        recon.trackMissionProgress();
+        recon.generateMissionReport();
     }
 }
